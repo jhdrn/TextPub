@@ -1,0 +1,84 @@
+@using TextPub
+@using TextPub.Models
+@using PagedList
+@{
+    Layout = "~/_SiteLayout.cshtml";
+
+    var category = TextPub.ArticleCategory(Context.GetRouteValue("category") ?? null);
+    var page = Convert.ToInt32(Context.GetRouteValue("page"));
+    
+    var articles = TextPub.Articles(categoryId: category != null ? category.Name : null, page: page, limit: 10) as IPagedList<ArticleModel>;
+    
+    if (category != null)
+    {
+        Page.Title = category.Name;   
+    }
+    else
+    {
+        Page.Title = "Articles";   
+    }
+}
+<h1>Articles</h1>
+@if (category != null)
+{
+<p>Category <strong>@category.Name</strong>:</p>
+}
+@if (articles.Any())
+{
+    <ul>
+    @foreach (var article in articles)
+    {
+        <li>
+            <h2><a href="@Href("/articles", article.Id)">@Html.Raw(article.Title)</a></h2>
+            <p>Published @article.PublishDate @if (article.Category != null) { <text>in <a href="@Href("/articles/category",  @article.Category.Id)">@article.Category.Name</a></text> }</p>
+        </li>
+    }
+    </ul>
+    
+    if (articles.PageCount > 1)
+    {
+        string baseUrl = "~/articles/";
+        if (category != null)
+        {
+            baseUrl += "category/" + category.Id;
+        }
+        baseUrl += "/page/";
+        
+    <div class="pager">
+        @if (articles.IsFirstPage)
+        {
+        <span>Newer articles</span>  
+        }
+        else
+        {
+        <a href="@Href(baseUrl + (page - 1))">Newer articles</a>
+        }
+
+        @if (articles.IsLastPage)
+        {
+            <span>Older articles</span>
+        }
+        else
+        {
+            <a href="@Href(baseUrl + (page + 1))">Older articles</a>
+        }
+    </div>
+    }
+}
+
+@{
+    var categories = TextPub.ArticleCategories();
+
+    if (categories.Any())
+    {
+<aside>
+        <h3>Article categories</h3>
+        <ul>
+        @foreach (var cat in categories)
+        {
+            <li><a href="@Href("/articles/category", cat.Id)">@cat.Name</a></li>
+        }
+        </ul>
+</aside>
+    }
+}
