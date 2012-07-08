@@ -9,9 +9,13 @@ using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
 using OAuth;
+using TextPub.DropBox.Models;
 
 namespace TextPub.DropBox
 {
+    /// <summary>
+    /// Handles all communication with the DropBox API.
+    /// </summary>
     public class DropBoxClient : OAuthBase
     {
         private string _consumerToken;
@@ -59,6 +63,11 @@ namespace TextPub.DropBox
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cursor"></param>
+        /// <returns></returns>
         internal Delta GetDelta(string cursor)
         {
             string parameters = null;
@@ -90,11 +99,16 @@ namespace TextPub.DropBox
             {
                 var reader = new StreamReader(e.Response.GetResponseStream());
                 string json = reader.ReadToEnd();
-                string authHeader = request.Headers["Authorization"];
+                // TODO: Log
             }
             return null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         internal byte[] GetFile(string path)
         {
             var requestUri = string.Format("{0}/{1}/files/{2}/{3}", _apiContentBaseUrl, _version, _root, EncodePath(path));
@@ -136,38 +150,55 @@ namespace TextPub.DropBox
             {
                 var reader = new StreamReader(e.Response.GetResponseStream());
                 string json = reader.ReadToEnd();
-                string authHeader = request.Headers["Authorization"];
+                //TODO: Log
             }
             return new byte[0];
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public UserCredentials GetRequestToken()
         {
             var requestUri = string.Format("{0}/{1}/oauth/request_token", _apiBaseUrl, _version);
 
             var request = CreateOAuthRequest(requestUri);
 
-            var response = request.GetResponse() as HttpWebResponse;
+            try
+            {
+                var response = request.GetResponse() as HttpWebResponse;
 
-            if (response.StatusCode != HttpStatusCode.OK)
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    // TODO: Log
+                    throw new Exception("TODO");
+                }
+
+                using (var reader = new StreamReader(response.GetResponseStream()))
+                {
+
+                    NameValueCollection responseParams = HttpUtility.ParseQueryString(reader.ReadToEnd());
+
+                    return new UserCredentials
+                    {
+                        Token = responseParams["oauth_token"],
+                        Secret = responseParams["oauth_token_secret"]
+                    };
+                }
+            }
+            catch (Exception e)
             {
                 // TODO: Log
-                throw new Exception("TODO");
             }
-
-            using (var reader = new StreamReader(response.GetResponseStream()))
-            {
-
-                NameValueCollection responseParams = HttpUtility.ParseQueryString(reader.ReadToEnd());
-
-                return new UserCredentials
-                {
-                    Token = responseParams["oauth_token"],
-                    Secret = responseParams["oauth_token_secret"]
-                };
-            }
+            return null;
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <returns></returns>
         public string GetAuthorizationUrl(string returnUrl)
         {
             if (string.IsNullOrWhiteSpace(returnUrl))
@@ -183,33 +214,51 @@ namespace TextPub.DropBox
             );
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public UserCredentials GetAccessToken()
         {
             var requestUri = string.Format("{0}/{1}/oauth/access_token", _apiBaseUrl, _version);
 
             HttpWebRequest request = CreateOAuthRequest(requestUri);
 
-            var response = request.GetResponse() as HttpWebResponse;
+            try
+            {
+                var response = request.GetResponse() as HttpWebResponse;
 
-            if (response.StatusCode != HttpStatusCode.OK)
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    // TODO: Log
+                    throw new Exception("TODO");
+                }
+
+                using (var reader = new StreamReader(response.GetResponseStream()))
+                {
+
+                    NameValueCollection responseParams = HttpUtility.ParseQueryString(reader.ReadToEnd());
+
+                    return new UserCredentials
+                    {
+                        Token = responseParams["oauth_token"],
+                        Secret = responseParams["oauth_token_secret"]
+                    };
+                }
+            }
+            catch (Exception e)
             {
                 // TODO: Log
-                throw new Exception("TODO");
             }
-
-            using (var reader = new StreamReader(response.GetResponseStream()))
-            {
-
-                NameValueCollection responseParams = HttpUtility.ParseQueryString(reader.ReadToEnd());
-
-                return new UserCredentials
-                {
-                    Token = responseParams["oauth_token"],
-                    Secret = responseParams["oauth_token_secret"]
-                };
-            }
+            return null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         private string EncodePath(string path)
         {
             string[] pathParts = path.TrimStart('/').Split('/');
@@ -220,11 +269,23 @@ namespace TextPub.DropBox
             return string.Join("/", pathParts);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="requestUriString"></param>
+        /// <returns></returns>
         private HttpWebRequest CreateOAuthRequest(string requestUriString)
         {
             return CreateOAuthRequest(requestUriString, string.Empty, WebRequestMethods.Http.Get);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="requestUriString"></param>
+        /// <param name="parameters"></param>
+        /// <param name="httpMethod"></param>
+        /// <returns></returns>
         private HttpWebRequest CreateOAuthRequest(string requestUriString, string parameters, string httpMethod)
         {
             var requestUri = new Uri(string.Format("{0}?{1}", requestUriString, parameters));
@@ -270,6 +331,13 @@ namespace TextPub.DropBox
             return request;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="nonce"></param>
+        /// <param name="timeStamp"></param>
+        /// <param name="signature"></param>
         private void SetRequestAuthorizationHeader(HttpWebRequest request, string nonce, string timeStamp, string signature)
         {
             var authParams = new NameValueCollection();

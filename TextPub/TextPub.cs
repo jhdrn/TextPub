@@ -8,29 +8,26 @@ using System.Linq.Expressions;
 using System.Web.Hosting;
 using System.Xml;
 using PagedList;
+using TextPub.DropBox;
 
 namespace TextPub
 {
     public static class TextPub
     {
-        public const string DropBoxConsumerToken = "DropBoxConsumerToken";
-        public const string DropBoxConsumerSecret = "DropBoxConsumerSecret";
-        public const string DropBoxUserToken = "DropBoxUserToken";
-        public const string DropBoxUserSecret = "DropBoxUserSecret";
-        public const string DropBoxSyncInterval = "DropBoxSyncInterval";
-        internal const string DropBoxDeltaCursor = "DropBoxDeltaCursor";
+        private static ArticleRepository _articleRepository;
+        private static PageRepository _pageRepository;
+        private static SnippetRepository _snippetRepository;
 
-        private static ArticleRepository _articleRepository = new ArticleRepository();
-        private static PageRepository _pageRepository = new PageRepository();
-        private static SnippetRepository _snippetRepository = new SnippetRepository();
-
-        internal static ConfigurationManager ConfigurationManager = new ConfigurationManager();
-
+        internal static Configuration Configuration = new Configuration();
        
         internal static ArticleRepository ArticleRepository
         {
             get
             {
+                if (_articleRepository == null)
+                {
+                    _articleRepository = new ArticleRepository(Configuration.ArticlesPath);
+                }
                 return _articleRepository;
             }
         }
@@ -39,6 +36,10 @@ namespace TextPub
         {
             get
             {
+                if (_pageRepository == null)
+                {
+                    _pageRepository = new PageRepository(Configuration.PagesPath);
+                }
                 return _pageRepository;
             }
         }
@@ -47,13 +48,21 @@ namespace TextPub
         {
             get
             {
+                if (_snippetRepository == null)
+                {
+                    _snippetRepository = new SnippetRepository(Configuration.SnippetsPath);
+                }
                 return _snippetRepository;
             }
         }
 
+        /// <summary>
+        /// Returns all articles.
+        /// </summary>
+        /// <returns></returns>
         public static IEnumerable<ArticleModel> Articles()
         {
-            return Articles(category: null, limit: null, page: null, sortDirections: null, sortBys: null);
+            return Articles(categoryId: null, limit: null, page: null, sortDirections: null, sortBys: null);
         }
 
         public static IEnumerable<ArticleModel> Articles(string sortBy, SortDirection? sortDirection, int? limit, int? page)
@@ -61,23 +70,32 @@ namespace TextPub
             return Articles(null, new string[] { sortBy }, sortDirection.HasValue ? new SortDirection[] { sortDirection.Value } : null, limit, page);
         }
 
-        public static IEnumerable<ArticleModel> Articles(string category, int? limit, int? page)
+        public static IEnumerable<ArticleModel> Articles(string categoryId, int? limit, int? page)
         {
-            return Articles(category, null, null, limit, page);
+            return Articles(categoryId, null, null, limit, page);
         }
 
-        public static IEnumerable<ArticleModel> Articles(string category, string sortBy, SortDirection sortDirection, int? limit, int? page)
+        public static IEnumerable<ArticleModel> Articles(string categoryId, string sortBy, SortDirection sortDirection, int? limit, int? page)
         {
-            return Articles(category, new string[] { sortBy }, new SortDirection[] { sortDirection }, limit, page);
+            return Articles(categoryId, new string[] { sortBy }, new SortDirection[] { sortDirection }, limit, page);
         }
 
-        public static IEnumerable<ArticleModel> Articles(string category, string[] sortBys, SortDirection[] sortDirections, int? limit, int? page)
+        /// <summary>
+        /// Returns a collection of articles. By default the articles is sorted by publish date (descending).
+        /// </summary>
+        /// <param name="categoryId">Filter the result set to articles in the category with the supplied categoryId.</param>
+        /// <param name="sortBys">An array of the names of the article properties that the result set should be sorted on.</param>
+        /// <param name="sortDirections">An array of SortDirection's. Should map to the array of sortBy's.</param>
+        /// <param name="limit">How many articles should be returned? If this parameter is passed, the returned type is a StaticPagedList<ArticleModel> which contains additional information for pagination.</param>
+        /// <param name="page">Used to offset the limit parameter. Passing a value of 1/0/null will return the first 10 articles, passing a value of 2 will return article 11 to 20, etc.</param>
+        /// <returns></returns>
+        public static IEnumerable<ArticleModel> Articles(string categoryId, string[] sortBys, SortDirection[] sortDirections, int? limit, int? page)
         {
             var articles = (IEnumerable<ArticleModel>)ArticleRepository.GetList();
 
-            if (!string.IsNullOrWhiteSpace(category))
+            if (!string.IsNullOrWhiteSpace(categoryId))
             {
-                articles = articles.Where(a => a.Category != null && a.Category.Name == category);
+                articles = articles.Where(a => a.Category != null && a.Category.Id == categoryId);
             }
 
             if (sortBys != null && sortBys.Where(x => !string.IsNullOrWhiteSpace(x)).Any())
@@ -142,89 +160,107 @@ namespace TextPub
 
         }
 
+        /// <summary>
+        /// Returns the article with the supplied id or null if no article with that id exists.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static ArticleModel Article(string id)
         {
             return ArticleRepository.Get(id);
         }
 
+        /// <summary>
+        /// Returns all article categories.
+        /// </summary>
+        /// <returns></returns>
         public static IEnumerable<CategoryModel> ArticleCategories()
         {
             return ArticleRepository.GetCategories();
         }
 
+        /// <summary>
+        /// Returns the article category with the supplied id or null if no article category with that id exists.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static CategoryModel ArticleCategory(string id)
         {
             return ArticleCategories().FirstOrDefault(c => c.Id == id);
         }
 
+        /// <summary>
+        /// Returns the page with the supplied id or null if no page with that id exists.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static PageModel Page(string id)
         {
             return PageRepository.Get(id);
         }
 
+        /// <summary>
+        /// Returns all pages.
+        /// </summary>
+        /// <returns></returns>
         public static IEnumerable<PageModel> Pages()
         {
             return PageRepository.GetList();
         }
 
+        /// <summary>
+        /// Returns the snippet with the supplied id or null if no snippet with that id exists.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static SnippetModel Snippet(string id)
         {
             return SnippetRepository.Get(id);
         }
 
 
+        /// <summary>
+        /// Indicates whether TextPub is fully configured or not.
+        /// </summary>
         public static bool IsConfigured { 
             get {
 
-                return !string.IsNullOrWhiteSpace(ConfigurationManager.Get(TextPub.DropBoxConsumerSecret))
-                    && !string.IsNullOrWhiteSpace(ConfigurationManager.Get(TextPub.DropBoxConsumerToken))
-                    && !string.IsNullOrWhiteSpace(ConfigurationManager.Get(TextPub.DropBoxUserSecret))
-                    && !string.IsNullOrWhiteSpace(ConfigurationManager.Get(TextPub.DropBoxUserToken));
-
-                /*
-                var appSettings = WebConfigurationManager.OpenWebConfiguration("~/").AppSettings.Settings;
-
-                return appSettings[TextPub.DropBoxConsumerSecret] != null && !string.IsNullOrWhiteSpace(appSettings[TextPub.DropBoxConsumerSecret].Value)
-                    && appSettings[TextPub.DropBoxConsumerToken] != null && !string.IsNullOrWhiteSpace(appSettings[TextPub.DropBoxConsumerToken].Value)
-                    && appSettings[TextPub.DropBoxUserSecret] != null && !string.IsNullOrWhiteSpace(appSettings[TextPub.DropBoxUserSecret].Value)
-                    && appSettings[TextPub.DropBoxUserToken] != null && !string.IsNullOrWhiteSpace(appSettings[TextPub.DropBoxUserToken].Value);
-                 */
+                return !string.IsNullOrWhiteSpace(Configuration.DropBoxConsumerSecret)
+                    && !string.IsNullOrWhiteSpace(Configuration.DropBoxConsumerToken)
+                    && !string.IsNullOrWhiteSpace(Configuration.DropBoxUserSecret)
+                    && !string.IsNullOrWhiteSpace(Configuration.DropBoxUserToken);
             }
         }
 
+
+        public static void ForceDropBoxSynchronization()
+        {
+
+            // TODO
+            //var job = new DropBoxSyncJob(new TimeSpan(), new TimeSpan(), Configuration);
+            //job.Execute();
+            
+        }
+
+        /// <summary>
+        /// Wrapper method to save the configuration. 
+        /// </summary>
+        /// <param name="consumerToken"></param>
+        /// <param name="consumerSecret"></param>
+        /// <param name="userToken"></param>
+        /// <param name="userSecret"></param>
+        /// <param name="syncInterval"></param>
         public static void Configure(string consumerToken, string consumerSecret, string userToken, string userSecret, int syncInterval)
         {
-            
-            ConfigurationManager.Put(TextPub.DropBoxConsumerToken, consumerToken);
-            ConfigurationManager.Put(TextPub.DropBoxConsumerSecret, consumerSecret);
+            Configuration.DropBoxConsumerToken = consumerToken;
+            Configuration.DropBoxConsumerSecret = consumerSecret;
 
-            ConfigurationManager.Put(TextPub.DropBoxUserToken, userToken);
-            ConfigurationManager.Put(TextPub.DropBoxUserSecret, userSecret);
+            Configuration.DropBoxUserToken = userToken;
+            Configuration.DropBoxUserSecret = userSecret;
 
-            ConfigurationManager.Put(TextPub.DropBoxSyncInterval, Convert.ToString(syncInterval));
-            /*
-            var config = WebConfigurationManager.OpenWebConfiguration("~/");
-            var appSettings = config.AppSettings.Settings;
+            Configuration.DropBoxSyncInterval = syncInterval;
 
-            appSettings.Remove(TextPub.DropBoxConsumerToken);
-            appSettings.Remove(TextPub.DropBoxConsumerSecret);
-
-            appSettings.Add(TextPub.DropBoxConsumerToken, consumerToken);
-            appSettings.Add(TextPub.DropBoxConsumerSecret, consumerSecret);
-
-            appSettings.Remove(TextPub.DropBoxUserToken);
-            appSettings.Remove(TextPub.DropBoxUserSecret);
-
-            appSettings.Add(TextPub.DropBoxUserToken, userToken);
-            appSettings.Add(TextPub.DropBoxUserSecret, userSecret);
-
-            appSettings.Remove(TextPub.DropBoxSyncInterval);
-            appSettings.Add(TextPub.DropBoxSyncInterval, Convert.ToString(syncInterval));
-
-            config.Save(ConfigurationSaveMode.Modified);
-
-            ConfigurationManager.RefreshSection("appSettings");
-            */
+            Configuration.Save();
         }
 
         private static object GetPropertyValue(object obj, string propertyName)
@@ -236,5 +272,12 @@ namespace TextPub
             return obj.GetType().GetProperty(propertyName).GetValue(obj, null);
         }
 
+
+        internal static void ClearCaches()
+        {
+            ArticleRepository.RemoveAll();
+            PageRepository.RemoveAll();
+            SnippetRepository.RemoveAll();
+        }
     }
 }

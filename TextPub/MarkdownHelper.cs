@@ -6,6 +6,9 @@ using MarkdownDeep;
 
 namespace TextPub
 {
+    /// <summary>
+    /// Wrapper for MarkdownDeep
+    /// </summary>
     public static class MarkdownHelper
     {
         private static Markdown _markdown;

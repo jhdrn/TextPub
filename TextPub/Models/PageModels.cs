@@ -22,13 +22,7 @@ namespace TextPub.Models
     {
         private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?<Title>.*)(?<SortOrder>\[[0-9]+\])?</h\k<HeadingLevel>>");
 
-        public override string RelativeFilesPath
-        {
-            get
-            {
-                return "pages";
-            }
-        }
+        public PageRepository(string path) : base(path) { }
 
         protected override PageModel CreateModel(FileInfo fileInfo, string relativePath)
         {

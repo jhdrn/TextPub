@@ -12,7 +12,12 @@ namespace TextPub.Models
     {
         private string _cacheKey { get { return typeof(T).Name; } }
 
-        public abstract string RelativeFilesPath { get; }
+        protected string _relativeFilesPath { get; private set; }
+
+        public CacheRepository(string relativeFilesPath)
+        {
+            _relativeFilesPath = relativeFilesPath;
+        }
 
         public T Get(string id) 
         {
@@ -62,7 +67,7 @@ namespace TextPub.Models
 
         protected virtual void RefreshList()
         {
-            IEnumerable<T> list = ReadFilesRecursively(RelativeFilesPath);
+            IEnumerable<T> list = ReadFilesRecursively(_relativeFilesPath);
             PutList(list.ToList());
         }
 
@@ -91,7 +96,7 @@ namespace TextPub.Models
 
         protected string GenerateLocalPath(string relativePath, string fileName)
         {
-            string path = relativePath.Substring(RelativeFilesPath.Length) + "/" + fileName;
+            string path = relativePath.Substring(_relativeFilesPath.Length) + "/" + fileName;
             return path.TrimStart('/', '\\');
         }
 
@@ -101,7 +106,7 @@ namespace TextPub.Models
             string fileName = fileInfo.Name;
             string fileWOExtension = fileName.Substring(0, fileName.Length - fileInfo.Extension.Length);
 
-            string[] pathParts = relativePath.Substring(RelativeFilesPath.Length).Replace('\\', '/').Split('/');
+            string[] pathParts = relativePath.Substring(_relativeFilesPath.Length).Replace('\\', '/').Split('/');
             for (int i = 0; i < pathParts.Length; i++)
             {
                 pathParts[i] = pathParts[i].UrlFriendly();

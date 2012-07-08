@@ -12,28 +12,27 @@ using System.IO;
 using Elmah;
 using System.Web.Hosting;
 using TextPub.Models;
+using TextPub.DropBox.Models;
 
 namespace TextPub.DropBox
 {
+    /// <summary>
+    /// Handles synchronization with DropBox. Checks DropBox's delta to copy/delete/overwrite any new/deleted/modified files.
+    /// </summary>
     internal class DropBoxSyncJob : Job
     {
         private DropBoxClient _client;
+        private Configuration _configuration;
 
-        private ArticleRepository _articleRepository;
-        private PageRepository _pageRepository;
-        private SnippetRepository _snippetRepository;
-
-        public DropBoxSyncJob(TimeSpan interval, TimeSpan timeout, ArticleRepository articleRepository, PageRepository pageRepository, SnippetRepository snippetRepository)
+        public DropBoxSyncJob(TimeSpan interval, TimeSpan timeout, Configuration configuration)
             : base("DropBox Sync Job", interval, timeout)
         {
-            _articleRepository = articleRepository;
-            _pageRepository = pageRepository;
-            _snippetRepository = snippetRepository;
+            _configuration = configuration;
         }
 
         public override Task Execute()
         {
-
+            // TODO: Remove this dependency
             if (!TextPub.IsConfigured)
             {
                 return null;
@@ -43,20 +42,23 @@ namespace TextPub.DropBox
             if (_client == null)
             {
                 _client = new DropBoxClient(
-                    TextPub.ConfigurationManager.Get(TextPub.DropBoxConsumerToken),
-                    TextPub.ConfigurationManager.Get(TextPub.DropBoxConsumerSecret),
-                    TextPub.ConfigurationManager.Get(TextPub.DropBoxUserToken),
-                    TextPub.ConfigurationManager.Get(TextPub.DropBoxUserSecret)
+                    _configuration.DropBoxConsumerToken,
+                    _configuration.DropBoxConsumerSecret,
+                    _configuration.DropBoxUserToken,
+                    _configuration.DropBoxUserSecret
                 );
             }
 
             return new Task(() =>
             {
-                CheckDelta(null, null, TextPub.ConfigurationManager.Get(TextPub.DropBoxDeltaCursor));
+                CheckDelta(_configuration.DropBoxDeltaCursor);
+
+                // TODO: Remove this dependency
+                TextPub.ClearCaches();
             });
         }
 
-        private void CheckDelta(Configuration config, AppSettingsSection appSettings, string deltaCursor)
+        private void CheckDelta(string deltaCursor)
         {
             Delta delta = _client.GetDelta(deltaCursor);
 
@@ -87,9 +89,9 @@ namespace TextPub.DropBox
                     }
                     string basePath = entry.Path.Substring(1, basePathEndPosition);
                     string localPath;
-                    if (basePath == _articleRepository.RelativeFilesPath
-                        || basePath == _pageRepository.RelativeFilesPath
-                        || basePath == _snippetRepository.RelativeFilesPath)
+                    if (basePath == _configuration.ArticlesPath 
+                        || basePath == _configuration.PagesPath
+                        || basePath == _configuration.SnippetsPath)
                     {
                         localPath = HostingEnvironment.MapPath(@"~/App_Data" + entry.Path);
                     }
@@ -97,8 +99,6 @@ namespace TextPub.DropBox
                     {
                         localPath = HostingEnvironment.MapPath(@"~/" + entry.Path);
                     }
-
-
 
                     // Create or delete directory and sync it's contents.
                     if (entry.MetaData.Is_Dir)
@@ -122,11 +122,12 @@ namespace TextPub.DropBox
 
                 }
 
-                TextPub.ConfigurationManager.Put(TextPub.DropBoxDeltaCursor, delta.Cursor);
+                _configuration.DropBoxDeltaCursor = delta.Cursor;
+                _configuration.Save();
 
                 if (delta.Has_More)
                 {
-                    CheckDelta(config, appSettings, delta.Cursor);
+                    CheckDelta(delta.Cursor);
                 }
             }
         }

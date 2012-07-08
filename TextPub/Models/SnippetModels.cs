@@ -14,13 +14,7 @@ namespace TextPub.Models
 
     internal class SnippetRepository : CacheRepository<SnippetModel>
     {
-        public override string RelativeFilesPath
-        {
-            get
-            {
-                return "snippets";
-            }
-        }
+        public SnippetRepository(string path) : base(path) { }
 
         protected override SnippetModel CreateModel(FileInfo fileInfo, string relativePath)
         {

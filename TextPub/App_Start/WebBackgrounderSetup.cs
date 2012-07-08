@@ -13,6 +13,10 @@ using TextPub.DropBox;
 
 namespace TextPub.App_Start
 {
+
+    /// <summary>
+    /// Starts and maintains the DropBox sync job.
+    /// </summary>
     public static class WebBackgrounderSetup
     {
 
@@ -30,18 +34,11 @@ namespace TextPub.App_Start
 
         private static JobManager CreateJobWorkersManager()
         {
-            string syncIntervalSetting = WebConfigurationManager.AppSettings[TextPub.DropBoxSyncInterval];
-
-            int syncInterval;
-            if (!int.TryParse(syncIntervalSetting, out syncInterval))
-            {
-                // Sync every hour per default
-                syncInterval = 60;
-            }
+            var syncInterval = TextPub.Configuration.DropBoxSyncInterval;
 
             var jobs = new IJob[]
             {
-                new DropBoxSyncJob(TimeSpan.FromMinutes(syncInterval), TimeSpan.FromSeconds(60), TextPub.ArticleRepository, TextPub.PageRepository, TextPub.SnippetRepository)
+                new DropBoxSyncJob(TimeSpan.FromMinutes(syncInterval), TimeSpan.FromSeconds(60), TextPub.Configuration)
             };
 
             var jobHost = new JobHost();

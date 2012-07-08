@@ -4,9 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web.Script.Serialization;
+using TextPub.DropBox.Models;
 
 namespace TextPub.DropBox
 {
+    /// <summary>
+    /// As DropBox returns every delta entry as a list where the first item is the path and the second is the metadata
+    /// this converter is needed to make DeltaEntry-instances.
+    /// </summary>
     internal class DeltaJavaScriptConverter : JavaScriptConverter
     {
         public override object Deserialize(IDictionary<string, object> dictionary, Type type, JavaScriptSerializer serializer)
@@ -15,7 +20,7 @@ namespace TextPub.DropBox
             delta.Cursor = (string)dictionary["cursor"];
             delta.Has_More = (bool)dictionary["has_more"];
             delta.Reset = (bool)dictionary["reset"];
-            delta.Entries = new List<Entry>();
+            delta.Entries = new List<DeltaEntry>();
 
             var entries = dictionary["entries"] as ArrayList;
             if (entries != null)
@@ -24,7 +29,7 @@ namespace TextPub.DropBox
                 {
                     var entryList = entry as ArrayList;
 
-                    var entryModel = new Entry 
+                    var entryModel = new DeltaEntry 
                     {
                         Path = (string)entryList[0]
                     };

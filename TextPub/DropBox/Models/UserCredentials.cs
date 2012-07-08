@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace TextPub.DropBox
+namespace TextPub.DropBox.Models
 {
     public class UserCredentials
     {

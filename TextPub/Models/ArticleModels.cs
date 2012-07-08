@@ -34,12 +34,7 @@ namespace TextPub.Models
 
         private IEnumerable<CategoryModel> _categories;
 
-        public override string RelativeFilesPath
-        {
-            get { 
-                return "articles";
-            }
-        }
+        public ArticleRepository(string path) : base(path) { }
 
         protected override ArticleModel CreateModel(FileInfo fileInfo, string relativePath)
         {
@@ -52,11 +47,11 @@ namespace TextPub.Models
             };
 
             string categoryName = fileInfo.Directory.Name;
-            if (categoryName != RelativeFilesPath)
+            if (categoryName != _relativeFilesPath)
             {
                 model.Category = new CategoryModel
                 {
-                    Id = relativePath.Substring(RelativeFilesPath.Length).Replace('\\', '/').TrimStart('/').UrlFriendly(),
+                    Id = relativePath.Substring(_relativeFilesPath.Length).Replace('\\', '/').TrimStart('/').UrlFriendly(),
                     Name = categoryName
                 };
             }
