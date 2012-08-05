@@ -5,6 +5,7 @@ using System.Text;
 
 namespace TextPub.DropBox.Models
 {
+    [Serializable]
     public class UserCredentials
     {
         public string Token { get; set; }
