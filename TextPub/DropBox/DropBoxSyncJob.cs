@@ -62,6 +62,12 @@ namespace TextPub.DropBox
         {
             Delta delta = _client.GetDelta(deltaCursor);
 
+            if (delta == null)
+            {
+                // TODO: Log
+                return;
+            }
+
             foreach (var entry in delta.Entries)
             {
 
