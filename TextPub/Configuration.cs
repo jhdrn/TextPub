@@ -65,7 +65,7 @@ namespace TextPub
         {
             var doc = XDocument.Load(_configPath);
 
-            DropBoxConsumerSecret = GetNodeValue(doc, DropBoxConsumerTokenKey);
+            DropBoxConsumerSecret = GetNodeValue(doc, DropBoxConsumerSecretKey);
             DropBoxConsumerToken = GetNodeValue(doc, DropBoxConsumerTokenKey);
             DropBoxUserSecret = GetNodeValue(doc, DropBoxUserSecretKey);
             DropBoxUserToken = GetNodeValue(doc, DropBoxUserTokenKey);
