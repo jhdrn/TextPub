@@ -8,6 +8,7 @@ using System.Net.Cache;
 using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
+using Elmah;
 using OAuth;
 using TextPub.DropBox.Models;
 
@@ -72,6 +73,7 @@ namespace TextPub.DropBox
         {
             string parameters = null;
             string requestUri = string.Format("{0}/{1}/delta", _apiBaseUrl, _version);
+            
             if (!string.IsNullOrWhiteSpace(cursor))
             {
                 parameters = string.Format("cursor={0}", UrlEncode(cursor));
@@ -97,12 +99,11 @@ namespace TextPub.DropBox
             }
             catch (WebException e)
             {
-                var reader = new StreamReader(e.Response.GetResponseStream());
-                string json = reader.ReadToEnd();
-                // TODO: Log
+                LogError(e);
             }
             return null;
         }
+
 
         /// <summary>
         /// 
@@ -148,9 +149,7 @@ namespace TextPub.DropBox
             }
             catch (WebException e)
             {
-                var reader = new StreamReader(e.Response.GetResponseStream());
-                string json = reader.ReadToEnd();
-                //TODO: Log
+                LogError(e);
             }
             return new byte[0];
         }
@@ -187,9 +186,9 @@ namespace TextPub.DropBox
                     };
                 }
             }
-            catch (Exception e)
+            catch (WebException e)
             {
-                // TODO: Log
+                LogError(e);
             }
             return null;
         }
@@ -247,9 +246,9 @@ namespace TextPub.DropBox
                     };
                 }
             }
-            catch (Exception e)
+            catch (WebException e)
             {
-                // TODO: Log
+                LogError(e);
             }
             return null;
         }
@@ -368,5 +367,15 @@ namespace TextPub.DropBox
                 )
             );
         }
+
+        private void LogError(WebException e)
+        {
+            var reader = new StreamReader(e.Response.GetResponseStream());
+            string rawJson = reader.ReadToEnd();
+            //dynamic json = _jsonSerializer.DeserializeObject(rawJson);
+
+            Elmah.ErrorLog.GetDefault(null).Log(new Error(new Exception(rawJson, e)));
+        }
     }
 }
+
