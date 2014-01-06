@@ -122,6 +122,12 @@ namespace TextPub.DropBox
                     var lastLocalWriteTime = File.GetLastWriteTimeUtc(localPath);
                     if (!File.Exists(localPath) || lastLocalWriteTime.CompareTo(entry.MetaData.DateModifiedUTC) < 0)
                     {
+                        var directoryPath = Path.GetDirectoryName(localPath);
+                        if (!Directory.Exists(directoryPath))
+                        {
+                            Directory.CreateDirectory(directoryPath);
+                        }
+
                         byte[] fileContents = _client.GetFile(entry.Path);
                         File.WriteAllBytes(localPath, fileContents);
                     }
