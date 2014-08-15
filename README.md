@@ -1,1 +1,1 @@
-# Simple DropBox publishing for .Net
+# Flat file publishing for .Net
