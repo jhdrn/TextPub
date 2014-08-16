@@ -1,4 +1,4 @@
-# Simple DropBox publishing for .Net
+# Flat file publishing for .Net
 
 TextPub makes it possible to publish Markdown formatted texts in your DropBox account to your web site. When copied, the files are parsed and read into objects which can be used to display the texts. 
 
