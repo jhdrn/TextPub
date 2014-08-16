@@ -1,77 +1,52 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
-using System.Web.Caching;
 using System.Web.Hosting;
-using System.IO;
+using TextPub.Models;
 
-namespace TextPub.Models
+namespace TextPub.Collections
 {
-    internal abstract class CacheRepository<T> where T : BaseModel
+
+    internal abstract class CachedModelCollection<T> : IModelCollection<T> where T : class, IIdentity
     {
         private string _cacheKey { get { return typeof(T).Name; } }
 
         protected string _relativeFilesPath { get; private set; }
 
-        public CacheRepository(string relativeFilesPath)
+        public CachedModelCollection(string relativeFilesPath)
         {
             _relativeFilesPath = relativeFilesPath;
         }
-
-        public T Get(string id) 
-        {
-            IList<T> list = GetList();
-            if (list == null || !list.Any())
-            {
-                return null;
-            }
-
-            return list.SingleOrDefault(m => m.Id == id);
-        }
-
-        public IList<T> GetList()
+        
+        protected IList<T> GetCollection()
         {
             var list = (IList<T>)HttpRuntime.Cache.Get(_cacheKey);
             if (list == null)
             {
-                RefreshList();
+                RefreshCollection();
             }
             return (IList<T>)HttpRuntime.Cache.Get(_cacheKey);
         }
 
-        public void PutList(IList<T> list)
+        protected void PutList(IList<T> list)
         {
             HttpRuntime.Cache.Insert(_cacheKey, list/*, null, DateTime.MaxValue, Cache.NoSlidingExpiration, */);
         }
 
-        public void Remove(string id)
-        {
-            T item = Get(id);
-            if (item == null)
-            {
-                return;
-            }
-
-            IList<T> list = GetList();
-            if (list != null)
-            {
-                list.Remove(item);
-            }
-        }
-
-        public void RemoveAll()
+        internal void ClearCache()
         {
             HttpRuntime.Cache.Remove(_cacheKey);
         }
 
-        protected virtual void RefreshList()
+        protected virtual void RefreshCollection()
         {
             IEnumerable<T> list = ReadFilesRecursively(_relativeFilesPath);
             PutList(list.ToList());
         }
 
-        private IEnumerable<T> ReadFilesRecursively(string relativePath)
+        protected IEnumerable<T> ReadFilesRecursively(string relativePath)
         {
             var absolutePath = HostingEnvironment.MapPath(@"~/App_Data/" + relativePath);
 
@@ -118,5 +93,28 @@ namespace TextPub.Models
 
 
         protected abstract T CreateModel(FileInfo fileInfo, string relativePath);
+
+        public T this[string id]
+        {
+            get {
+                var collection = GetCollection();
+                if (collection == null)
+                {
+                    return null;
+                }
+
+                return collection.SingleOrDefault(m => m.Id == id);
+            }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return GetCollection().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }
