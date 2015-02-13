@@ -54,15 +54,15 @@ namespace TextPub.Collections
                 id: id, 
                 path: path, 
                 title: title, 
-                body: html, 
-                level: path.Count(p => p == '/'), 
+                body: html,
+                level: path.Count(p => p == Path.DirectorySeparatorChar), 
                 sortOrder: sortOrder
             );
         }
 
-        protected override void RefreshCollection()
+        protected override void RebuildCache()
         {
-            var list = ReadFilesRecursively(_relativeFilesPath).OrderBy(p => p.Path.Length).ToList();
+            var list = ReadFilesRecursively(_filesPath).OrderBy(p => p.Path.Length).ToList();
 
             // Set page parents
             foreach (Page page in list)
@@ -81,7 +81,7 @@ namespace TextPub.Collections
                 page.Children = list.Where(p => p.Parent != null && p.Parent.Id == page.Id);
             }
 
-            PutList(list.OrderBy(p => p.SortOrder).ToList());
+            InsertIntoCache(list.OrderBy(p => p.SortOrder).ToList());
         }
     }
 }

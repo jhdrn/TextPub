@@ -1,66 +1,70 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
+using System.Runtime.Caching;
 using System.Web.Hosting;
 using TextPub.Models;
 
 namespace TextPub.Collections
 {
-
     internal abstract class CachedModelCollection<T> : IModelCollection<T> where T : class, IIdentity
     {
-        private string _cacheKey { get { return typeof(T).Name; } }
+        private static MemoryCache _cache = new MemoryCache("TextPub");
 
-        protected string _relativeFilesPath { get; private set; }
+        private readonly string _cacheKey = "__TextPub_" + typeof(T).Name + "Collection";
 
-        public CachedModelCollection(string relativeFilesPath)
+        protected readonly string _filesPath;
+
+        public CachedModelCollection(string filesPath)
         {
-            _relativeFilesPath = relativeFilesPath;
+            _filesPath = filesPath;
         }
         
         protected IList<T> GetCollection()
         {
-            var list = (IList<T>)HttpRuntime.Cache.Get(_cacheKey);
+            var list = _cache.Get(_cacheKey) as IList<T>;
+            
             if (list == null)
             {
-                RefreshCollection();
+                RebuildCache();
             }
-            return (IList<T>)HttpRuntime.Cache.Get(_cacheKey);
+            return (IList<T>)_cache.Get(_cacheKey);
         }
 
-        protected void PutList(IList<T> list)
+        protected void InsertIntoCache(IList<T> collection)
         {
-            HttpRuntime.Cache.Insert(_cacheKey, list/*, null, DateTime.MaxValue, Cache.NoSlidingExpiration, */);
+            _cache.Set(_cacheKey, collection, new CacheItemPolicy
+            {
+                AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(1)
+            });
         }
 
         internal void ClearCache()
         {
-            HttpRuntime.Cache.Remove(_cacheKey);
+            _cache.Remove(_cacheKey);
         }
 
-        protected virtual void RefreshCollection()
+        protected virtual void RebuildCache()
         {
-            IEnumerable<T> list = ReadFilesRecursively(_relativeFilesPath);
-            PutList(list.ToList());
+            var collection = ReadFilesRecursively(_filesPath).ToList();
+            InsertIntoCache(collection);
         }
 
-        protected IEnumerable<T> ReadFilesRecursively(string relativePath)
+        protected IEnumerable<T> ReadFilesRecursively(string path)
         {
-            var absolutePath = HostingEnvironment.MapPath(@"~/App_Data/" + relativePath);
-
-            if (Directory.Exists(absolutePath))
+            if (Directory.Exists(path))
             {
-                var dirInfo = new DirectoryInfo(absolutePath);
+                var dirInfo = new DirectoryInfo(path);
                 foreach (var fileInfo in dirInfo.GetFiles())
                 {
-                    yield return CreateModel(fileInfo, relativePath);
+                    yield return CreateModel(fileInfo, path);
                 }
 
                 foreach (var subDirInfo in dirInfo.GetDirectories())
                 {
-                    foreach (T model in ReadFilesRecursively(relativePath + Path.DirectorySeparatorChar + subDirInfo.Name))
+                    foreach (T model in ReadFilesRecursively(path + Path.DirectorySeparatorChar + subDirInfo.Name))
                     {
                         yield return model;
                     }
@@ -68,20 +72,18 @@ namespace TextPub.Collections
             }
         }
 
-
         protected string GenerateLocalPath(string relativePath, string fileName)
         {
-            string path = relativePath.Substring(_relativeFilesPath.Length) + "/" + fileName;
-            return path.TrimStart('/', '\\');
+            string path = relativePath.Substring(_filesPath.Length).Replace('\\', Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar + fileName;
+            return path.TrimStart(Path.DirectorySeparatorChar);
         }
-
 
         protected string GenerateId(FileInfo fileInfo, string relativePath)
         {
             string fileName = fileInfo.Name;
             string fileWOExtension = fileName.Substring(0, fileName.Length - fileInfo.Extension.Length);
 
-            string[] pathParts = relativePath.Substring(_relativeFilesPath.Length).Replace('\\', '/').Split('/');
+            string[] pathParts = relativePath.Substring(_filesPath.Length).Replace('\\', '/').Split('/');
             for (int i = 0; i < pathParts.Length; i++)
             {
                 pathParts[i] = pathParts[i].UrlFriendly();
@@ -90,7 +92,6 @@ namespace TextPub.Collections
             string id = string.Join("/", pathParts) + "/" + fileWOExtension.UrlFriendly();
             return id.TrimStart('/').ToLower();
         }
-
 
         protected abstract T CreateModel(FileInfo fileInfo, string relativePath);
 

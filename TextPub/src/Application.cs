@@ -1,16 +1,30 @@
-﻿using TextPub.Collections;
+﻿using System;
+using System.Web.Hosting;
+using TextPub.Collections;
 using TextPub.Models;
 
 namespace TextPub
 {
-    public static class Application
+    public sealed class Application
     {
-        private static PostCollection _posts;
-        private static PageCollection _pages;
-        private static SnippetCollection _snippets;
+        private static Lazy<PostCollection> _posts = new Lazy<PostCollection>(() => new PostCollection(GetAbsolutePath(Configuration.PostsPath)));
+        private static Lazy<PageCollection> _pages = new Lazy<PageCollection>(() => new PageCollection(GetAbsolutePath(Configuration.PagesPath)));
+        private static Lazy<SnippetCollection> _snippets = new Lazy<SnippetCollection>(() => new SnippetCollection(GetAbsolutePath(Configuration.SnippetsPath)));
 
         private static Configuration _configuration = new Configuration();
+        private static Application _instance = new Application();
 
+        private Application()
+        {
+        }
+
+        //public static Application Instance 
+        //{ 
+        //    get {
+        //        return _instance;
+        //    }
+        //}
+        
         public static Configuration Configuration
         {
             get
@@ -27,11 +41,7 @@ namespace TextPub
         {
             get
             {
-                if (_posts == null)
-                {
-                    _posts = new PostCollection(Configuration.PostsPath);
-                }
-                return _posts;
+                return _posts.Value;
             }
         }
                 
@@ -43,11 +53,7 @@ namespace TextPub
         {
             get
             {
-                if (_pages == null)
-                {
-                    _pages = new PageCollection(Configuration.PagesPath);
-                }
-                return _pages;
+                return _pages.Value;
             }
         }
         
@@ -58,19 +64,31 @@ namespace TextPub
         {
             get
             {
-                if (_snippets == null)
-                {
-                    _snippets = new SnippetCollection(Configuration.SnippetsPath);
-                }
-                return _snippets;
+                return _snippets.Value;
             }
         }
 
-        //internal static void ClearCaches()
-        //{
-        //    _posts.ClearCache();
-        //    _pages.ClearCache();
-        //    _snippets.ClearCache();
-        //}
+        public static void ClearCaches()
+        {
+            if (_posts.IsValueCreated)
+                _posts.Value.ClearCache();
+
+            if (_pages.IsValueCreated)
+                _pages.Value.ClearCache();
+
+            if (_snippets.IsValueCreated)
+                _snippets.Value.ClearCache();
+        }
+
+        private static string GetAbsolutePath(string path)
+        {
+            var basePath = Configuration.BasePath;
+            if (basePath.StartsWith("~"))
+            {
+                basePath = HostingEnvironment.MapPath(basePath);
+            }
+
+            return basePath + "/" + path;
+        }
     }
 }

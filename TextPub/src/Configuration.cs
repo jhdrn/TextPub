@@ -4,6 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web;
 using System.Web.Configuration;
 using System.Web.Hosting;
 using System.Xml;
@@ -13,20 +14,49 @@ namespace TextPub
 {
     public sealed class Configuration
     {
-        private const string _postsPathKey = "PostsPath";
-        private const string _pagesPathKey = "PagesPath";
-        private const string _snippetsPathKey = "SnippetsPath";
+        private const string _basePathKey = "TextPub_BasePath";
+        private const string _postsPathKey = "TextPub_PostsPath";
+        private const string _pagesPathKey = "TextPub_PagesPath";
+        private const string _snippetsPathKey = "TextPub_SnippetsPath";
 
         private System.Configuration.Configuration _configuration;
 
         internal Configuration()
         {
-            // Set some defaults
-            PostsPath = PostsPath ?? "posts";
-            PagesPath = PagesPath ?? "pages";
-            SnippetsPath = SnippetsPath ?? "snippets";
-        }
+            if (HttpContext.Current != null) 
+            {
+                _configuration = WebConfigurationManager.OpenWebConfiguration(HostingEnvironment.ApplicationVirtualPath);
+            }
+            else 
+            {
+                // for unit testing
+                ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap();
+                fileMap.ExeConfigFilename = "../../web.config";
+                _configuration = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
+            }
 
+            // Set some defaults
+            if (BasePath == null)
+            { 
+                BasePath = "~/App_Data";
+            }
+
+            if (PostsPath == null)
+            { 
+                PostsPath = "posts";
+            }
+
+            if (PostsPath == null)
+            { 
+                PagesPath = "pages";
+            }
+
+            if (SnippetsPath == null)
+            { 
+                SnippetsPath = "snippets";
+            }
+        }
+       
         /// <summary>
         /// The base path of the site powered by TextPub (i.e. /Apps/TextPub/{SitePath}/{PostsPath})
         /// 
@@ -36,11 +66,11 @@ namespace TextPub
         {
             get
             {
-                return ConfigurationManager.AppSettings[_postsPathKey];
+                return _configuration.GetAppSettingOrDefault(_postsPathKey);
             }
             set
             {
-                WriteSetting(_postsPathKey, value);
+                _configuration.SaveAppSetting(_postsPathKey, value);
             }
         }
 
@@ -53,11 +83,11 @@ namespace TextPub
         {
             get
             {
-                return ConfigurationManager.AppSettings[_pagesPathKey];
+                return _configuration.GetAppSettingOrDefault(_pagesPathKey);
             }
             set
             {
-                WriteSetting(_pagesPathKey, value);
+                _configuration.SaveAppSetting(_pagesPathKey, value);
             }
         }
 
@@ -70,20 +100,24 @@ namespace TextPub
         {
             get
             {
-                return ConfigurationManager.AppSettings[_snippetsPathKey];
+                return _configuration.GetAppSettingOrDefault(_snippetsPathKey);
             }
             set
             {
-                WriteSetting(_snippetsPathKey, value);
+                _configuration.SaveAppSetting(_snippetsPathKey, value);
             }
         }
 
-        private void WriteSetting(string key, string value)
+        public string BasePath
         {
-            _configuration = WebConfigurationManager.OpenWebConfiguration("~");
-            _configuration.AppSettings.Settings.Remove(key);
-            _configuration.AppSettings.Settings.Add(key, value);
-            _configuration.Save();
+            get
+            {
+                return _configuration.GetAppSettingOrDefault(_basePathKey);
+            }
+            set
+            {
+                _configuration.SaveAppSetting(_basePathKey, value);
+            }
         }
     }
 }

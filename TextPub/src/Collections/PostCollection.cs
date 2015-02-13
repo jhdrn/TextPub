@@ -5,7 +5,6 @@ using System.Web;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
-using System.Web.Hosting;
 using TextPub.Models;
 
 namespace TextPub.Collections
@@ -27,9 +26,9 @@ namespace TextPub.Collections
             Category category = null;
 
             string categoryName = fileInfo.Directory.Name;
-            if (categoryName != _relativeFilesPath)
+            if (categoryName != _filesPath)
             {
-                var categoryId = relativePath.Substring(_relativeFilesPath.Length).Replace('\\', '/').TrimStart('/').UrlFriendly();
+                var categoryId = relativePath.Substring(_filesPath.Length).Replace('\\', '/').TrimStart('/').UrlFriendly();
                 category = new Category(categoryId, categoryName);
             }
 
@@ -46,15 +45,10 @@ namespace TextPub.Collections
                 var publishDateString = match.Groups["PublishDate"].Value;
                 if (!string.IsNullOrWhiteSpace(publishDateString))
                 {
-                    try
-                    {
-                        publishDate = DateTime.Parse(publishDateString);
-                    }
-                    catch { }
+                    DateTime.TryParse(publishDateString, out publishDate);
                 }
                 html = html.Substring(match.Index + match.Length);
             }
-
 
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -71,10 +65,10 @@ namespace TextPub.Collections
             );
         }
 
-        protected override void RefreshCollection()
+        protected override void RebuildCache()
         {
             _categories = null;
-            base.RefreshCollection();
+            base.RebuildCache();
         }
 
         public IModelCollection<Category> Categories
