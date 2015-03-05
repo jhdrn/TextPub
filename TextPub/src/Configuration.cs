@@ -9,6 +9,7 @@ using System.Web.Configuration;
 using System.Web.Hosting;
 using System.Xml;
 using System.Xml.Linq;
+using TextPub.Models;
 
 namespace TextPub
 {
@@ -119,5 +120,9 @@ namespace TextPub
                 _configuration.SaveAppSetting(_basePathKey, value);
             }
         }
+
+        public Func<IPage, IPage> PageDecoratorProvider { get; set; }
+        public Func<IPost, IPost> PostDecoratorProvider { get; set; }
+        public Func<ISnippet, ISnippet> SnippetDecoratorProvider { get; set; }
     }
 }

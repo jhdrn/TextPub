@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>TextPub</id>
+    <title>TextPub</title>
+    <version>1.0.0</version>
+    <owners>Jonathan Hedrén</owners>
+    <authors>Jonathan Hedrén</authors>
+    <copyright>Copyright 2012-2015 Jonathan Hedrén</copyright>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectUrl>https://github.com/jonathanhedren/TextPub</projectUrl>
+    <licenseUrl>https://github.com/jonathanhedren/TextPub/blob/master/LICENSE.txt</licenseUrl>
+    <tags>markdown publishing cms</tags>
+    <summary>Flat file publishing for .Net.</summary>
+    <description>TextPub reads (optionally Markdown formatted) text files from disk and wraps them in an API for easy publishing.</description>
+  </metadata>
+  <files>
+    <file src="bin\Release\TextPub.dll" target="lib\net40\" />
+    <file src="bin\Release\TextPub.pdb" target="lib\net40\" />
+    <file src="src\**\*.*" target="src" />
+  </files>
+</package>

@@ -2,7 +2,7 @@
 
 namespace TextPub.Models
 {
-    public class Page : IIdentity
+    public class Page : IPage
     {
         internal Page(string id, string path, string title, string body, int level, int? sortOrder)
         {
@@ -24,9 +24,9 @@ namespace TextPub.Models
 
         public int Level { get; private set; }
 
-        public Page Parent { get; internal set; }
+        public IPage Parent { get; set; }
 
-        public IEnumerable<Page> Children { get; internal set; }
+        public IEnumerable<IPage> Children { get; set; }
 
         public int? SortOrder { get; private set; }
     }

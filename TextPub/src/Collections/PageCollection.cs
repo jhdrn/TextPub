@@ -8,25 +8,20 @@ using TextPub.Models;
 
 namespace TextPub.Collections
 {
-    internal class PageCollection : CachedModelCollection<Page>
+    internal class PageCollection : CachedModelCollection<IPage>
     {
         private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?<Title>.*)(?<SortOrder>\[[0-9]+\])?</h\k<HeadingLevel>>");
-
-        public PageCollection(string path) : base(path) { }
-
-        protected override Page CreateModel(FileInfo fileInfo, string relativePath)
+        
+        public PageCollection(string path, Func<IPage, IPage> decoratorProvider)
+            : base(path, decoratorProvider) 
         {
+        }
 
-            var id = GenerateId(fileInfo, relativePath);
-            var path = GenerateLocalPath(relativePath, fileInfo.Name);
+        protected override IPage CreateModel(FileInfo fileInfo, string relativePath, string path, string id, string html)
+        {
             int? sortOrder = null;
             string title = null;
 
-            byte[] fileContents = File.ReadAllBytes(fileInfo.FullName);
-
-            string fileContentsString = System.Text.Encoding.UTF8.GetString(fileContents).TrimStart();
-
-            var html = MarkdownHelper.Transform(fileContentsString);
             var match = _htmlHeadingRegex.Match(html);
             if (match.Success)
             {
@@ -49,7 +44,6 @@ namespace TextPub.Collections
             {
                 title = fileInfo.Name.Substring(0, fileInfo.Name.Length - fileInfo.Extension.Length);
             }
-            
             return new Page(
                 id: id, 
                 path: path, 
@@ -65,7 +59,7 @@ namespace TextPub.Collections
             var list = ReadFilesRecursively(_filesPath).OrderBy(p => p.Path.Length).ToList();
 
             // Set page parents
-            foreach (Page page in list)
+            foreach (IPage page in list)
             {
                 if (page.Level > 0)
                 {
@@ -76,7 +70,7 @@ namespace TextPub.Collections
             }
 
             // Set page children
-            foreach (Page page in list)
+            foreach (IPage page in list)
             {
                 page.Children = list.Where(p => p.Parent != null && p.Parent.Id == page.Id);
             }

@@ -1,7 +1,7 @@
 ﻿
 namespace TextPub.Models
 {
-    internal interface IIdentity
+    public interface IIdentity
     {
         string Id { get; }
     }

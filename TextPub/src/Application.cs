@@ -7,12 +7,12 @@ namespace TextPub
 {
     public sealed class Application
     {
-        private static Lazy<PostCollection> _posts = new Lazy<PostCollection>(() => new PostCollection(GetAbsolutePath(Configuration.PostsPath)));
-        private static Lazy<PageCollection> _pages = new Lazy<PageCollection>(() => new PageCollection(GetAbsolutePath(Configuration.PagesPath)));
-        private static Lazy<SnippetCollection> _snippets = new Lazy<SnippetCollection>(() => new SnippetCollection(GetAbsolutePath(Configuration.SnippetsPath)));
+        private static Lazy<PostCollection> _posts = new Lazy<PostCollection>(() => new PostCollection(GetAbsolutePath(Configuration.PostsPath), Configuration.PostDecoratorProvider));
+        private static Lazy<PageCollection> _pages = new Lazy<PageCollection>(() => new PageCollection(GetAbsolutePath(Configuration.PagesPath), Configuration.PageDecoratorProvider));
+        private static Lazy<SnippetCollection> _snippets = new Lazy<SnippetCollection>(() => new SnippetCollection(GetAbsolutePath(Configuration.SnippetsPath), Configuration.SnippetDecoratorProvider));
 
         private static Configuration _configuration = new Configuration();
-        private static Application _instance = new Application();
+        //private static Application _instance = new Application();
 
         private Application()
         {
@@ -49,7 +49,7 @@ namespace TextPub
         /// Returns all pages.
         /// </summary>
         /// <returns></returns>
-        public static IModelCollection<Page> Pages
+        public static IModelCollection<IPage> Pages
         {
             get
             {
@@ -60,7 +60,7 @@ namespace TextPub
         /// <summary>
         /// 
         /// </summary>
-        public static IModelCollection<Snippet> Snippets
+        public static IModelCollection<ISnippet> Snippets
         {
             get
             {

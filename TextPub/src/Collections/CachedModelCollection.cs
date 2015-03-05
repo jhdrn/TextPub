@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Text;
 using System.Web.Hosting;
 using TextPub.Models;
 
@@ -16,10 +17,12 @@ namespace TextPub.Collections
         private readonly string _cacheKey = "__TextPub_" + typeof(T).Name + "Collection";
 
         protected readonly string _filesPath;
+        private Func<T, T> _decoratorProvider;
 
-        public CachedModelCollection(string filesPath)
+        public CachedModelCollection(string filesPath, Func<T, T> decoratorProvider)
         {
             _filesPath = filesPath;
+            _decoratorProvider = decoratorProvider;
         }
         
         protected IList<T> GetCollection()
@@ -59,7 +62,19 @@ namespace TextPub.Collections
                 var dirInfo = new DirectoryInfo(path);
                 foreach (var fileInfo in dirInfo.GetFiles())
                 {
-                    yield return CreateModel(fileInfo, path);
+                    var id = GenerateId(fileInfo, path);
+                    var localPath = GenerateLocalPath(path, fileInfo.Name);
+                    var fileContents = File.ReadAllText(fileInfo.FullName, Encoding.UTF8);
+
+                    var html = MarkdownHelper.Transform(fileContents);
+                    var model = CreateModel(fileInfo, path, localPath, id, html);
+
+                    if (_decoratorProvider != null)
+                    {
+                        model = _decoratorProvider(model);
+                    }
+
+                    yield return model;
                 }
 
                 foreach (var subDirInfo in dirInfo.GetDirectories())
@@ -72,13 +87,13 @@ namespace TextPub.Collections
             }
         }
 
-        protected string GenerateLocalPath(string relativePath, string fileName)
+        private string GenerateLocalPath(string relativePath, string fileName)
         {
             string path = relativePath.Substring(_filesPath.Length).Replace('\\', Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar + fileName;
             return path.TrimStart(Path.DirectorySeparatorChar);
         }
 
-        protected string GenerateId(FileInfo fileInfo, string relativePath)
+        private string GenerateId(FileInfo fileInfo, string relativePath)
         {
             string fileName = fileInfo.Name;
             string fileWOExtension = fileName.Substring(0, fileName.Length - fileInfo.Extension.Length);
@@ -93,7 +108,7 @@ namespace TextPub.Collections
             return id.TrimStart('/').ToLower();
         }
 
-        protected abstract T CreateModel(FileInfo fileInfo, string relativePath);
+        protected abstract T CreateModel(FileInfo fileInfo, string relativePath, string path, string id, string html);
 
         public T this[string id]
         {

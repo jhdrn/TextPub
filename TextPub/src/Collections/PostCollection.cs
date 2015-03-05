@@ -9,18 +9,19 @@ using TextPub.Models;
 
 namespace TextPub.Collections
 {
-    internal class PostCollection : CachedModelCollection<Post>, IPostCollection
+    internal class PostCollection : CachedModelCollection<IPost>, IPostCollection
     {
-        private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?<Title>.*)(?<PublishDate>\[[0-9/\-]+\])?</h\k<HeadingLevel>>");
+        private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?<Title>.+(?<PublishDate>\[[0-9/\-]+\]))</h\k<HeadingLevel>>");
 
         private IModelCollection<Category> _categories;
 
-        public PostCollection(string path) : base(path) { }
-
-        protected override Post CreateModel(FileInfo fileInfo, string relativePath)
+        public PostCollection(string path, Func<IPost, IPost> decoratorProvider)
+            : base(path, decoratorProvider) 
         {
-            var id = GenerateId(fileInfo, relativePath);
-            var path = GenerateLocalPath(relativePath, fileInfo.Name);
+        }
+
+        protected override IPost CreateModel(FileInfo fileInfo, string relativePath, string path, string id, string html)
+        {
             string title = null;
             var publishDate = fileInfo.LastWriteTimeUtc;
             Category category = null;
@@ -31,12 +32,6 @@ namespace TextPub.Collections
                 var categoryId = relativePath.Substring(_filesPath.Length).Replace('\\', '/').TrimStart('/').UrlFriendly();
                 category = new Category(categoryId, categoryName);
             }
-
-            byte[] fileContents = File.ReadAllBytes(fileInfo.FullName);
-
-            string fileContentsString = System.Text.Encoding.UTF8.GetString(fileContents).TrimStart();
-
-            var html = MarkdownHelper.Transform(HttpUtility.HtmlEncode(fileContentsString));
 
             var match = _htmlHeadingRegex.Match(html);
             if (match.Success)

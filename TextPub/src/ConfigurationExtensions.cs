@@ -7,7 +7,7 @@ namespace TextPub
 {
     public static class ConfigurationExtensions
     {
-        public static void SaveAppSetting(this System.Configuration.Configuration configuration, string key, string value)
+        internal static void SaveAppSetting(this System.Configuration.Configuration configuration, string key, string value)
         {
             Contract.AssertNotNull(configuration);
 
@@ -16,7 +16,7 @@ namespace TextPub
             configuration.Save();
         }
 
-        public static string GetAppSettingOrDefault(this System.Configuration.Configuration configuration, string key)
+        internal static string GetAppSettingOrDefault(this System.Configuration.Configuration configuration, string key)
         {
             Contract.AssertNotNullOrWhitespace(key);
 

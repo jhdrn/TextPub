@@ -14,7 +14,7 @@ namespace TextPub
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string UrlFriendly(this String input)
+        public static string UrlFriendly(this string input)
         {
             // Solution by Jon Skeet
             // http://stackoverflow.com/a/810359/321233

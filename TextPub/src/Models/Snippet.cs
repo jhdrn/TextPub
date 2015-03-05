@@ -1,7 +1,7 @@
 ﻿
 namespace TextPub.Models
 {
-    public class Snippet : IIdentity
+    public class Snippet : ISnippet
     {
         internal Snippet(string id, string path, string content)
         {

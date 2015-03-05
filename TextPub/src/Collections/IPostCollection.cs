@@ -6,7 +6,7 @@ using TextPub.Models;
 
 namespace TextPub.Collections
 {
-    public interface IPostCollection : IModelCollection<Post>
+    public interface IPostCollection : IModelCollection<IPost>
     {
         IModelCollection<Category> Categories { get; }
     }

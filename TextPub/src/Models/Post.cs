@@ -2,7 +2,7 @@
 
 namespace TextPub.Models
 {
-    public class Post : IIdentity
+    public class Post : IPost
     {
         internal Post(string id, string path, string title, string body, DateTime? publishDate, Category category)
         {

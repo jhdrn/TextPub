@@ -3,25 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using TextPub.Models;
+using System.Text;
 
 namespace TextPub.Collections
 {
-    internal class SnippetCollection : CachedModelCollection<Snippet>
+    internal class SnippetCollection : CachedModelCollection<ISnippet>
     {
-        public SnippetCollection(string path) 
-            : base(path) 
+        public SnippetCollection(string path, Func<ISnippet, ISnippet> decoratorProvider)
+            : base(path, decoratorProvider) 
         { 
         }
 
-        protected override Snippet CreateModel(FileInfo fileInfo, string relativePath)
-        {
-            var id = GenerateId(fileInfo, relativePath);
-            var path = GenerateLocalPath(relativePath, fileInfo.Name);
-
-            byte[] fileContents = File.ReadAllBytes(fileInfo.FullName);
-            string fileContentsString = System.Text.Encoding.UTF8.GetString(fileContents).TrimStart();
-            
-            return new Snippet(id, path, MarkdownHelper.Transform(fileContentsString));
+        protected override ISnippet CreateModel(FileInfo fileInfo, string relativePath, string path, string id, string html)
+        {            
+            return new Snippet(id, path, html);
         }
 
     }
