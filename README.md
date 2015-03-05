@@ -1,19 +1,15 @@
 # Flat file publishing for .Net
 
-TextPub makes it possible to publish Markdown formatted texts , the files are parsed and read into objects which can be used to display the texts. 
-
-Files that reside in the special folders "posts", "pages" and "snippets" are parsed and read into C# objects (`Post`, `Page`, `Snippet` respectively). 
-
-Once the C# equivalents to the files has been created, they are cached for fast-as-lightning access.
+TextPub exposes an API to publish Markdown formatted texts from disk. Files that reside in the special folders "posts", "pages" and "snippets" are parsed and transformed into C# objects (`IPost`, `IPage`, `ISnippet` respectively). Once the C# equivalents to the files has been created, they are cached for fast-as-lightning access.
 
 ## Entity types
-All entities share the same base class which contains two properties:
+All entities share the same base interface which contains two properties:
 
 * **Id**: "URL-friendly" string generated from the path and name of the file.
 * **Path**: The relative path to the file.
 
 ### Articles
-All files in the `/posts` folder are converted to `Post`'s which contains the following properties:
+All files in the `/posts` folder are converted to `IPost`'s which contains the following properties:
 
 * **Title**: If the text starts with a header tag, it's contents will be used as title. If not, the name of the file will be used as title.
 * **Body**: The HTML-formatted contents of the file but without the title if any.
@@ -24,7 +20,7 @@ All files in the `/posts` folder are converted to `Post`'s which contains the fo
 By creating sub folders to `/posts`, article categories (and sub categories) are made. Each folder will be converted to a `Category`.
 
 ### Pages
-All files in the `/pages` folder are converted to `Page`'s which contains the following properties:
+All files in the `/pages` folder are converted to `IPage`'s which contains the following properties:
 
 * **Title**: If the text starts with a header tag, it's contents will be used as title. If not, the name of the file will be used as title.
 * **Body**: The HTML-formatted contents of the file but without the title if any.
@@ -34,7 +30,7 @@ All files in the `/pages` folder are converted to `Page`'s which contains the fo
 * **SortOrder**: Can be specified by putting an integer within brackets _after_ the page title (an example: `# My page title [5]`
 
 ### Snippets
-All files in the `/snippets` folder are converted to `Snippet`'s which contains the following properties:
+All files in the `/snippets` folder are converted to `ISnippet`'s which contains the following properties:
 
 * **Content**: The HTML-formatted contents of the snippet.
 
