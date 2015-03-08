@@ -11,7 +11,7 @@ namespace TextPub.Collections
 {
     internal class PostCollection : CachedModelCollection<IPost>, IPostCollection
     {
-        private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?<Title>.+(?<PublishDate>\[[0-9/\-]+\]))</h\k<HeadingLevel>>");
+        private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?(.*\[[\d/\-]+\])(?<Title>.*)\[(?<PublishDate>[\d/\-]+)\]|(?<Title>.+))</h\k<HeadingLevel>>");
 
         private IModelCollection<Category> _categories;
 
@@ -36,8 +36,8 @@ namespace TextPub.Collections
             var match = _htmlHeadingRegex.Match(html);
             if (match.Success)
             {
-                title = match.Groups["Title"].Value;
-                var publishDateString = match.Groups["PublishDate"].Value;
+                title = match.Groups["Title"].Value.Trim();
+                var publishDateString = match.Groups["PublishDate"].Value.Trim();
                 if (!string.IsNullOrWhiteSpace(publishDateString))
                 {
                     DateTime.TryParse(publishDateString, out publishDate);

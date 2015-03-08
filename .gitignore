@@ -2,3 +2,5 @@
 /TextPub/bin
 /TextPub/obj
 /packages
+/TextPub.Tests/bin
+/TextPub.Tests/obj

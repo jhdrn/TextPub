@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MarkdownDeep;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +16,12 @@ namespace TextPub.Collections
         private static MemoryCache _cache = new MemoryCache("TextPub");
 
         private readonly string _cacheKey = "__TextPub_" + typeof(T).Name + "Collection";
+
+        private Markdown _markdown = new Markdown
+        {
+            ExtraMode = true,
+            SafeMode = true
+        };
 
         protected readonly string _filesPath;
         private Func<T, T> _decoratorProvider;
@@ -66,7 +73,7 @@ namespace TextPub.Collections
                     var localPath = GenerateLocalPath(path, fileInfo.Name);
                     var fileContents = File.ReadAllText(fileInfo.FullName, Encoding.UTF8);
 
-                    var html = MarkdownHelper.Transform(fileContents);
+                    var html = Transform(fileContents);
                     var model = CreateModel(fileInfo, path, localPath, id, html);
 
                     if (_decoratorProvider != null)
@@ -85,6 +92,11 @@ namespace TextPub.Collections
                     }
                 }
             }
+        }
+
+        private string Transform(string input)
+        {
+            return _markdown.Transform(input);
         }
 
         private string GenerateLocalPath(string relativePath, string fileName)

@@ -56,7 +56,6 @@
     <Compile Include="src\Contract.cs" />
     <Compile Include="src\Models\Category.cs" />
     <Compile Include="src\Collections\IModelCollection.cs" />
-    <Compile Include="src\MarkdownHelper.cs" />
     <Compile Include="src\Collections\IPostCollection.cs" />
     <Compile Include="src\Collections\ModelCollection.cs" />
     <Compile Include="src\Models\IIdentity.cs" />
