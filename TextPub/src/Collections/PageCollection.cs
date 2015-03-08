@@ -10,7 +10,7 @@ namespace TextPub.Collections
 {
     internal class PageCollection : CachedModelCollection<IPage>
     {
-        private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?<Title>.*)(?<SortOrder>\[[0-9]+\])?</h\k<HeadingLevel>>");
+        private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?(.*\[\d+\])(?<Title>.*)\[(?<SortOrder>\d+)\]|(?<Title>.+))</h\k<HeadingLevel>>");
         
         public PageCollection(string path, Func<IPage, IPage> decoratorProvider)
             : base(path, decoratorProvider) 
