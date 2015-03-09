@@ -11,7 +11,7 @@ namespace TextPub.Collections
 {
     internal class PostCollection : CachedModelCollection<IPost>, IPostCollection
     {
-        private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?(.*\[[\d/\-]+\])(?<Title>.*)\[(?<PublishDate>[\d/\-]+)\]|(?<Title>.+))</h\k<HeadingLevel>>");
+        private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?(.*\[[\d/\-]+\])(?<Title>.*)\[(?<PublishDate>[\d/\-]+)\]|(?<Title>.+))?</h\k<HeadingLevel>>");
 
         private IModelCollection<Category> _categories;
 
@@ -53,7 +53,7 @@ namespace TextPub.Collections
             return new Post(
                 id: id,
                 path: path,
-                title: title,
+                title: title.Trim(),
                 body: html,
                 publishDate: publishDate,
                 category: category

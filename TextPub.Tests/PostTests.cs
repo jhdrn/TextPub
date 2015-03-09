@@ -15,41 +15,46 @@ namespace TextPub.Tests
         [Fact]
         public void TestPostWithTitle()
         {
-            Assert.Equal(Application.Posts["post"].Title, "Post title");
-            Assert.Equal(Application.Posts["post-without-title"].Body, "<p>The post body...</p>\n");
-            Assert.NotNull(Application.Posts["post-with-publish-date"].PublishDate);
+            var post = Application.Posts["post"];
+            Assert.Equal("Post title", post.Title);
+            Assert.Equal("\n<p>The post body...</p>\n", post.Body);
+            Assert.NotNull(post.PublishDate);
         }
 
         [Fact]
         public void TestPostWithoutTitle()
         {
-            Assert.Equal(Application.Posts["post-without-title"].Title, "post-without-title");
-            Assert.Equal(Application.Posts["post-without-title"].Body, "<p>The post body...</p>\n");
-            Assert.NotNull(Application.Posts["post-with-publish-date"].PublishDate);
+            var post = Application.Posts["post-without-title"];
+            Assert.Equal("post-without-title", post.Title);
+            Assert.Equal("<p>The post body...</p>\n", post.Body);
+            Assert.NotNull(post.PublishDate);
         }
 
         [Fact]
         public void TestPostWithPublishDate()
         {
-            Assert.Equal(Application.Posts["post-with-publish-date"].Title, "Post title");
-            Assert.Equal(Application.Posts["post-with-publish-date"].PublishDate, DateTime.Parse("2015-01-01"));
-            Assert.Equal(Application.Posts["post-without-title"].Body, "<p>The post body...</p>\n");
+            var post = Application.Posts["post-with-publish-date"];
+            Assert.Equal(post.Title, "Post title");
+            Assert.Equal(post.PublishDate, DateTime.Parse("2015-01-01"));
+            Assert.Equal(post.Body, "\n<p>The post body...</p>\n");
         }
 
         [Fact]
-        public void TestPostTitleWithEmptyTitle()
+        public void TestPostWithEmptyTitle()
         {
-            Assert.Equal(Application.Posts["post-with-empty-title"].Title, "post-with-empty-title");
-            Assert.Equal(Application.Posts["post-without-title"].Body, "<p>The post body...</p>\n");
-            Assert.NotNull(Application.Posts["post-with-publish-date"].PublishDate);
+            var post = Application.Posts["post-with-empty-title"];
+            Assert.Equal(post.Title, "post-with-empty-title");
+            Assert.Equal(post.Body, "\n<p>The post body...</p>\n");
+            Assert.NotNull(post.PublishDate);
         }
 
         [Fact]
-        public void TestPostTitleWithDateTitle()
+        public void TestPostWithDateTitle()
         {
-            Assert.Equal(Application.Posts["post-with-date-title"].Title, "post-with-date-title");
-            Assert.Equal(Application.Posts["post-with-date-title"].PublishDate, DateTime.Parse("2015-01-01"));
-            Assert.Equal(Application.Posts["post-without-title"].Body, "<p>The post body...</p>\n");
+            var post = Application.Posts["post-with-date-title"];
+            Assert.Equal(post.Title, "post-with-date-title");
+            Assert.Equal(post.PublishDate, DateTime.Parse("2015-01-01"));
+            Assert.Equal(post.Body, "\n<p>The post body...</p>\n");
         }
     }
 }

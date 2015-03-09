@@ -64,6 +64,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="PageTests.cs" />
     <Compile Include="PostTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -90,6 +91,11 @@
     <Content Include="App_Data\posts\post-with-empty-title.md" />
     <Content Include="App_Data\posts\post-with-date-title.md" />
     <Content Include="App_Data\posts\post-without-title.md" />
+    <Content Include="App_Data\pages\page-with-sort-order-no-title.md" />
+    <Content Include="App_Data\pages\page-with-empty-title.md" />
+    <Content Include="App_Data\pages\page-with-sort-order.md" />
+    <Content Include="App_Data\pages\page-without-title.md" />
+    <Content Include="App_Data\pages\page.md" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
