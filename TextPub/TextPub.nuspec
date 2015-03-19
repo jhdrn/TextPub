@@ -3,7 +3,7 @@
   <metadata>
     <id>TextPub</id>
     <title>TextPub</title>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <owners>Jonathan Hedrén</owners>
     <authors>Jonathan Hedrén</authors>
     <copyright>Copyright 2012-2015 Jonathan Hedrén</copyright>
@@ -13,6 +13,9 @@
     <tags>markdown publishing cms</tags>
     <summary>Flat file publishing for .Net.</summary>
     <description>TextPub reads (optionally Markdown formatted) text files from disk and wraps them in an API for easy publishing.</description>
+    <dependencies>
+      <dependency id="MarkdownDeep.NET" version="1.5" />
+    </dependencies>
   </metadata>
   <files>
     <file src="bin\Release\TextPub.dll" target="lib\net40\" />

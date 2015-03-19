@@ -39,6 +39,10 @@ By default, TextPub uses app settings in web.config to configure which folders s
 
 ## Release notes
 
+### v1.1.2
+
+- Added missed dependency in .nuspec.
+
 ### v1.1.1
 
 - Removed/added some markdown options.
