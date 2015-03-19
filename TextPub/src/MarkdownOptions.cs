@@ -39,11 +39,18 @@ namespace TextPub
         public bool AutoHeadingIDs { get; set; }
 
         /// <summary>
-        /// When set, all non-qualified urls (links and images) will be qualified using this 
-        /// location as the base.(Useful when rendering RSS feeds that require fully qualified
-        /// urls).
+        /// When set, all non-qualified urls (links and images) will
+        /// be qualified using this location as the base.
+        /// Useful when rendering RSS feeds that require fully qualified urls.
         /// </summary>
-        public bool UrlBaseLocation { get; set; }
+        public string UrlBaseLocation { get; set; }
+
+        /// <summary>
+        /// When set, all non-qualified urls (links and images) begining with a slash
+        /// will qualified by prefixing with this string.
+        /// Useful when rendering RSS feeds that require fully qualified urls. 
+        /// </summary>
+        public string UrlRootLocation { get; set; }
 
         /// <summary>
         /// When true, all fully qualified urls will be give `target="_blank"' attribute causing 
@@ -85,25 +92,5 @@ namespace TextPub
         /// When set, all links get rel="nofollow" attribute
         /// </summary>
         public bool NofollowLinks { get; set; }
-
-        /// <summary>
-        /// Sets the class name for the div used to wrap the footnotes section.
-        /// </summary>
-        public string HtmlClassFootnotes { get; set; }
-
-        /// <summary>
-        /// Set the classname for titled images
-        ///
-        ///A titled image is defined as a paragraph that contains an image and nothing else. If not 
-        ///set (the default), this features is disabled, otherwise the output is similar to:
-        ///
-        /// <div class="<%=this.HtmlClassTitledImags%>">
-        ///     <img src="image.png" />
-        ///     <p>Alt text goes here</p>
-        /// </div>
-        /// 
-        /// Use CSS to style the figure and the caption
-        /// </summary>
-        public string HtmlClassTitledImages { get; set; }
     }
 }

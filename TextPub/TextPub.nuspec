@@ -3,7 +3,7 @@
   <metadata>
     <id>TextPub</id>
     <title>TextPub</title>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <owners>Jonathan Hedrén</owners>
     <authors>Jonathan Hedrén</authors>
     <copyright>Copyright 2012-2015 Jonathan Hedrén</copyright>
@@ -17,6 +17,7 @@
   <files>
     <file src="bin\Release\TextPub.dll" target="lib\net40\" />
     <file src="bin\Release\TextPub.pdb" target="lib\net40\" />
+    <file src="bin\Release\TextPub.xml" target="lib\net40\" />
     <file src="src\**\*.*" target="src" />
   </files>
 </package>

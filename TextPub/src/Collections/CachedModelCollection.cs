@@ -34,17 +34,16 @@ namespace TextPub.Collections
                 DocumentLocation = options.DocumentLocation,
                 DocumentRoot = options.DocumentRoot,
                 ExtraMode = options.ExtraMode,
-                HtmlClassFootnotes = options.HtmlClassFootnotes,
-                HtmlClassTitledImages = options.HtmlClassTitledImages,
                 MarkdownInHtml = options.MarkdownInHtml,
                 MaxImageWidth = options.MaxImageWidth,
                 NewWindowForExternalLinks = options.NewWindowForExternalLinks,
                 NewWindowForLocalLinks = options.NewWindowForLocalLinks,
                 NoFollowLinks = options.NofollowLinks,
-                SafeMode = options.SafeMode
+                SafeMode = options.SafeMode,
+                UrlBaseLocation = options.UrlBaseLocation,
+                UrlRootLocation = options.UrlRootLocation
             };
             _decoratorProvider = decoratorProvider;
-            
         }
         
         protected IList<T> GetCollection()
