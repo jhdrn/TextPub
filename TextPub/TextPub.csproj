@@ -54,6 +54,8 @@
   <ItemGroup>
     <Compile Include="src\ConfigurationExtensions.cs" />
     <Compile Include="src\Contract.cs" />
+    <Compile Include="src\IConfiguration.cs" />
+    <Compile Include="src\MarkdownOptions.cs" />
     <Compile Include="src\Models\Category.cs" />
     <Compile Include="src\Collections\IModelCollection.cs" />
     <Compile Include="src\Collections\IPostCollection.cs" />
@@ -70,13 +72,15 @@
     <Compile Include="src\Models\Snippet.cs" />
     <Compile Include="src\Collections\SnippetCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Configuration.cs" />
+    <Compile Include="src\WebConfiguration.cs" />
     <Compile Include="src\StringExtensions.cs" />
     <Compile Include="src\Application.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="TextPub.nuspec" />
+    <None Include="TextPub.nuspec">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Moq;
+using System;
 using System.Linq;
 using TextPub;
 using Xunit;
@@ -9,7 +10,7 @@ namespace TextPub.Tests
     {
         public PageTests()
         {
-            Application.Configuration.BasePath = "../../App_Data";
+            Helpers.MockConfiguration();
         }
 
         [Fact]

@@ -17,19 +17,34 @@ namespace TextPub.Collections
 
         private readonly string _cacheKey = "__TextPub_" + typeof(T).Name + "Collection";
 
-        private Markdown _markdown = new Markdown
-        {
-            ExtraMode = true,
-            SafeMode = true
-        };
+        private Markdown _markdown;
 
         protected readonly string _filesPath;
         private Func<T, T> _decoratorProvider;
 
-        public CachedModelCollection(string filesPath, Func<T, T> decoratorProvider)
+        public CachedModelCollection(string filesPath, MarkdownOptions options, Func<T, T> decoratorProvider)
         {
             _filesPath = filesPath;
+
+            options = options ?? MarkdownOptions.Create();
+
+            _markdown = new Markdown
+            {
+                AutoHeadingIDs = options.AutoHeadingIDs,
+                DocumentLocation = options.DocumentLocation,
+                DocumentRoot = options.DocumentRoot,
+                ExtraMode = options.ExtraMode,
+                HtmlClassFootnotes = options.HtmlClassFootnotes,
+                HtmlClassTitledImages = options.HtmlClassTitledImages,
+                MarkdownInHtml = options.MarkdownInHtml,
+                MaxImageWidth = options.MaxImageWidth,
+                NewWindowForExternalLinks = options.NewWindowForExternalLinks,
+                NewWindowForLocalLinks = options.NewWindowForLocalLinks,
+                NoFollowLinks = options.NofollowLinks,
+                SafeMode = options.SafeMode
+            };
             _decoratorProvider = decoratorProvider;
+            
         }
         
         protected IList<T> GetCollection()

@@ -7,16 +7,13 @@ namespace TextPub
 {
     public sealed class Application
     {
-        private static Lazy<PostCollection> _posts = new Lazy<PostCollection>(() => new PostCollection(GetAbsolutePath(Configuration.PostsPath), Configuration.PostDecoratorProvider));
-        private static Lazy<PageCollection> _pages = new Lazy<PageCollection>(() => new PageCollection(GetAbsolutePath(Configuration.PagesPath), Configuration.PageDecoratorProvider));
-        private static Lazy<SnippetCollection> _snippets = new Lazy<SnippetCollection>(() => new SnippetCollection(GetAbsolutePath(Configuration.SnippetsPath), Configuration.SnippetDecoratorProvider));
+        private static Lazy<PostCollection> _posts = new Lazy<PostCollection>(() => new PostCollection(GetAbsolutePath(Configuration.PostsPath), Configuration.MarkdownOptions, Configuration.PostDecoratorProvider));
+        private static Lazy<PageCollection> _pages = new Lazy<PageCollection>(() => new PageCollection(GetAbsolutePath(Configuration.PagesPath), Configuration.MarkdownOptions, Configuration.PageDecoratorProvider));
+        private static Lazy<SnippetCollection> _snippets = new Lazy<SnippetCollection>(() => new SnippetCollection(GetAbsolutePath(Configuration.SnippetsPath), Configuration.MarkdownOptions, Configuration.SnippetDecoratorProvider));
 
-        private static Configuration _configuration = new Configuration();
+        private static IConfiguration _configuration;
+
         //private static Application _instance = new Application();
-
-        private Application()
-        {
-        }
 
         //public static Application Instance 
         //{ 
@@ -24,12 +21,21 @@ namespace TextPub
         //        return _instance;
         //    }
         //}
-        
-        public static Configuration Configuration
+
+        public static IConfiguration Configuration
         {
             get
             {
-                return _configuration; 
+                if (_configuration == null)
+                {
+                    _configuration = new WebConfiguration();
+                }
+
+                return _configuration;
+            }
+            set
+            {
+                _configuration = value;
             }
         }
 

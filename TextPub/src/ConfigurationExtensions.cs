@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TextPub
 {
-    public static class ConfigurationExtensions
+    internal static class ConfigurationExtensions
     {
         internal static void SaveAppSetting(this System.Configuration.Configuration configuration, string key, string value)
         {

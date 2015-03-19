@@ -13,7 +13,7 @@ using TextPub.Models;
 
 namespace TextPub
 {
-    public sealed class Configuration
+    public sealed class WebConfiguration : IConfiguration
     {
         private const string _basePathKey = "TextPub_BasePath";
         private const string _postsPathKey = "TextPub_PostsPath";
@@ -22,19 +22,9 @@ namespace TextPub
 
         private System.Configuration.Configuration _configuration;
 
-        internal Configuration()
+        internal WebConfiguration()
         {
-            if (HttpContext.Current != null) 
-            {
-                _configuration = WebConfigurationManager.OpenWebConfiguration(HostingEnvironment.ApplicationVirtualPath);
-            }
-            else 
-            {
-                // for unit testing
-                ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap();
-                fileMap.ExeConfigFilename = "../../web.config";
-                _configuration = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
-            }
+            _configuration = WebConfigurationManager.OpenWebConfiguration(HostingEnvironment.ApplicationVirtualPath);
 
             // Set some defaults
             if (BasePath == null)
@@ -56,6 +46,8 @@ namespace TextPub
             { 
                 SnippetsPath = "snippets";
             }
+
+            MarkdownOptions = MarkdownOptions.Create();
         }
        
         /// <summary>
@@ -120,6 +112,8 @@ namespace TextPub
                 _configuration.SaveAppSetting(_basePathKey, value);
             }
         }
+
+        public MarkdownOptions MarkdownOptions { get; private set; }
 
         public Func<IPage, IPage> PageDecoratorProvider { get; set; }
         public Func<IPost, IPost> PostDecoratorProvider { get; set; }

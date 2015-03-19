@@ -12,8 +12,8 @@ namespace TextPub.Collections
     {
         private Regex _htmlHeadingRegex = new Regex(@"^\s*<h(?<HeadingLevel>\d)[^>]*?>(?(.*\[\d+\])(?<Title>.*)\[(?<SortOrder>\d+)\]|(?<Title>.+))?</h\k<HeadingLevel>>");
         
-        public PageCollection(string path, Func<IPage, IPage> decoratorProvider)
-            : base(path, decoratorProvider) 
+        public PageCollection(string path, MarkdownOptions options, Func<IPage, IPage> decoratorProvider)
+            : base(path, options, decoratorProvider) 
         {
         }
 

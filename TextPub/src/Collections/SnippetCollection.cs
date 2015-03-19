@@ -9,8 +9,8 @@ namespace TextPub.Collections
 {
     internal class SnippetCollection : CachedModelCollection<ISnippet>
     {
-        public SnippetCollection(string path, Func<ISnippet, ISnippet> decoratorProvider)
-            : base(path, decoratorProvider) 
+        public SnippetCollection(string path, MarkdownOptions options, Func<ISnippet, ISnippet> decoratorProvider)
+            : base(path, options, decoratorProvider) 
         { 
         }
 

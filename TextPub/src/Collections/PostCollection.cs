@@ -15,8 +15,8 @@ namespace TextPub.Collections
 
         private IModelCollection<Category> _categories;
 
-        public PostCollection(string path, Func<IPost, IPost> decoratorProvider)
-            : base(path, decoratorProvider) 
+        public PostCollection(string path, MarkdownOptions options, Func<IPost, IPost> decoratorProvider)
+            : base(path, options, decoratorProvider) 
         {
         }
 

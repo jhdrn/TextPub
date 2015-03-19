@@ -35,4 +35,21 @@ All files in the `/snippets` folder are converted to `ISnippet`'s which contains
 * **Content**: The HTML-formatted contents of the snippet.
 
 ## Configuration
-TextPub uses app settings in web.config to configure which folders should be used for "entity conversion". 
+By default, TextPub uses app settings in web.config to configure which folders should be used for "entity conversion". Markdown options can be set from code.
+
+## Release notes
+
+### v1.1
+
+- Decoupled Application.Configuration from it's interface (`IConfiguration`). Default configuration implementation is now `WebConfiguration`.
+- Added possibility to set markdown parsing options via `Application.Configuration.MarkdownOptions`.
+
+### v1.0.1
+
+- Added DecoratorProvider's.
+- Added some tests.
+- Bugfixes.
+
+### v1.0
+
+Initial release.
